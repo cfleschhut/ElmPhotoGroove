@@ -27,9 +27,7 @@ view model =
         [ h1 [] [ text "Photo Groove" ]
         , div [ id "thumbnails" ]
             (List.map
-                (\photo ->
-                    viewThumbnail model.selectedUrl photo
-                )
+                (viewThumbnail model.selectedUrl)
                 model.photos
             )
         , img [ src (urlPrefix ++ "large/" ++ model.selectedUrl), class "large" ] []
