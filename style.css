@@ -30,4 +30,5 @@ img {
 
 #thumbnails {
   width: 440px;
+  float: left;
 }
