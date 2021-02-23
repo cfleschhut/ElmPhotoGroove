@@ -87,7 +87,7 @@ sizeToString size =
             "small"
 
         Medium ->
-            "medium"
+            "med"
 
         Large ->
             "large"
@@ -101,7 +101,7 @@ view model =
         , h3 [] [ text "Thumbnail Size:" ]
         , div [ id "choose-size" ]
             (List.map viewSizeChooser [ Small, Medium, Large ])
-        , div [ id "thumbnails" ]
+        , div [ id "thumbnails", class (sizeToString model.chosenSize) ]
             (List.map
                 (viewThumbnail model.selectedUrl)
                 model.photos
