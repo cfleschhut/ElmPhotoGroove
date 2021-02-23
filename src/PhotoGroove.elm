@@ -2,9 +2,15 @@ module PhotoGroove exposing (main)
 
 import Array exposing (Array)
 import Browser
-import Html exposing (Html, button, div, h1, img, text)
+import Html exposing (Html, button, div, h1, h3, img, input, label, text)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+
+
+type ThumbnailSize
+    = Small
+    | Medium
+    | Large
 
 
 type alias Photo =
@@ -12,7 +18,10 @@ type alias Photo =
 
 
 type alias Model =
-    { photos : List Photo, selectedUrl : String }
+    { photos : List Photo
+    , selectedUrl : String
+    , chosenSize : ThumbnailSize
+    }
 
 
 initialModel : Model
@@ -23,6 +32,7 @@ initialModel =
         , { url = "3.jpeg" }
         ]
     , selectedUrl = "1.jpeg"
+    , chosenSize = Medium
     }
 
 
@@ -62,11 +72,35 @@ viewThumbnail selectedUrl thumb =
         []
 
 
+viewSizeChooser : ThumbnailSize -> Html msg
+viewSizeChooser size =
+    label []
+        [ input [ type_ "radio", name "size" ] []
+        , text (sizeToString size)
+        ]
+
+
+sizeToString : ThumbnailSize -> String
+sizeToString size =
+    case size of
+        Small ->
+            "small"
+
+        Medium ->
+            "medium"
+
+        Large ->
+            "large"
+
+
 view : Model -> Html Msg
 view model =
     div [ class "content" ]
         [ h1 [] [ text "Photo Groove" ]
         , button [ onClick { description = "ClickedSurpriseMe", data = "" } ] [ text "Surprise Me!" ]
+        , h3 [] [ text "Thumbnail Size:" ]
+        , div [ id "choose-size" ]
+            (List.map viewSizeChooser [ Small, Medium, Large ])
         , div [ id "thumbnails" ]
             (List.map
                 (viewThumbnail model.selectedUrl)
