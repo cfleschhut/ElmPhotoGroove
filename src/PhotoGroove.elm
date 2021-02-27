@@ -1,10 +1,10 @@
 module PhotoGroove exposing (main)
 
-import Array exposing (Array)
 import Browser
 import Html exposing (Html, button, div, h1, h3, img, input, label, text)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Http
 import Random
 
 
@@ -19,6 +19,7 @@ type Msg
     | ClickedSize ThumbnailSize
     | ClickedSurpriseMe
     | GotRandomPhoto Photo
+    | GotPhotos (Result Http.Error String)
 
 
 type alias Photo =
@@ -72,7 +73,23 @@ update msg model =
                 Errored errorMessage ->
                     ( model, Cmd.none )
 
+        GotPhotos (Ok responseStr) ->
+            case String.split "," responseStr of
+                (firstUrl :: _) as urls ->
+                    let
+                        photos =
+                            List.map Photo urls
+                    in
+                    ( { model | status = Loaded photos firstUrl }, Cmd.none )
 
+                [] ->
+                    ( { model | status = Errored "0 photos found" }, Cmd.none )
+
+        GotPhotos (Err _) ->
+            ( { model | status = Errored "Server error!" }, Cmd.none )
+
+
+selectUrl : String -> Status -> Status
 selectUrl url status =
     case status of
         Loading ->
@@ -151,11 +168,19 @@ viewLoaded photos selectedUrl chosenSize =
     ]
 
 
+initialCmd : Cmd Msg
+initialCmd =
+    Http.get
+        { url = "http://elm-in-action.com/photos/list"
+        , expect = Http.expectString GotPhotos
+        }
+
+
 main : Program () Model Msg
 main =
     Browser.element
-        { init = \flags -> ( initialModel, Cmd.none )
+        { init = \_ -> ( initialModel, initialCmd )
         , view = view
         , update = update
-        , subscriptions = \model -> Sub.none
+        , subscriptions = \_ -> Sub.none
         }
