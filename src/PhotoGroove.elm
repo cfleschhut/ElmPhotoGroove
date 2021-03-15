@@ -1,12 +1,13 @@
 module PhotoGroove exposing (main)
 
 import Browser
-import Html exposing (Html, button, div, h1, h3, img, input, label, text)
-import Html.Attributes exposing (class, classList, id, name, src, title, type_)
+import Html exposing (Attribute, Html, button, div, h1, h3, img, input, label, node, text)
+import Html.Attributes as Attr exposing (class, classList, id, name, src, title, type_)
 import Html.Events exposing (onClick)
 import Http
 import Json.Decode exposing (Decoder, field, int, list, map3, string, succeed)
 import Json.Decode.Pipeline exposing (optional, required)
+import Json.Encode as Encode
 import Random
 
 
@@ -29,16 +30,6 @@ type alias Photo =
     , size : Int
     , title : String
     }
-
-
-
--- photoDecoder : Decoder Photo
--- photoDecoder =
---     map3
---         (\url size title -> { url = url, size = size, title = title })
---         (field "url" string)
---         (field "size" int)
---         (field "title" string)
 
 
 photoDecoder : Decoder Photo
@@ -176,6 +167,11 @@ viewLoaded : List Photo -> String -> ThumbnailSize -> List (Html Msg)
 viewLoaded photos selectedUrl chosenSize =
     [ h1 [] [ text "Photo Groove" ]
     , button [ onClick ClickedSurpriseMe ] [ text "Surprise Me!" ]
+    , div [ class "filters" ]
+        [ viewFilter "Hue" 0
+        , viewFilter "Ripple" 0
+        , viewFilter "Noise" 0
+        ]
     , h3 [] [ text "Thumbnail Size:" ]
     , div [ id "choose-size" ]
         (List.map viewSizeChooser [ Small, Medium, Large ])
@@ -186,6 +182,24 @@ viewLoaded photos selectedUrl chosenSize =
         )
     , img [ src (urlPrefix ++ "large/" ++ selectedUrl), class "large" ] []
     ]
+
+
+rangeSlider : List (Attribute msg) -> List (Html msg) -> Html msg
+rangeSlider attributes children =
+    node "range-slider" attributes children
+
+
+viewFilter : String -> Int -> Html msg
+viewFilter name magnitude =
+    div [ class "filter-slider" ]
+        [ label [] [ text name ]
+        , rangeSlider
+            [ Attr.max "11"
+            , Attr.property "val" (Encode.int magnitude)
+            ]
+            []
+        , label [] [ text (String.fromInt magnitude) ]
+        ]
 
 
 initialCmd : Cmd Msg
