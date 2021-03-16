@@ -19,6 +19,16 @@
             sliders: 1,
             grid: false,
           });
+
+          var rangeSliderNode = this;
+
+          jsr.addEventListener('update', (elem, value) => {
+            var event = new CustomEvent('slide', {
+              detail: { userSlidTo: value },
+            });
+
+            rangeSliderNode.dispatchEvent(event);
+          });
         }
       }
 
